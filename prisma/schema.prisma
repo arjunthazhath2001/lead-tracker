@@ -15,13 +15,17 @@ datasource db {
 
 model Lead {
   id        Int      @id @default(autoincrement())
+  companyName String
+  contactName String  
+  email    String     @unique
+  source  Source
+  status Status @default(NEW)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  companyName String   @db.VarChar(255)
-  contactName String   @db.VarChar(255)
-  email    String     @db.VarChar(255) @unique
-  source  Source
-  status Status
+
+  @@map("business_leads")
+  @@index([status])
+
 }
 
 enum Source {
