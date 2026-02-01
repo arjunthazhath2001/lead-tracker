@@ -20,12 +20,22 @@ model Lead {
   email    String     @unique
   source  Source
   status Status @default(NEW)
+  
+  newLeadNotification NotificationState @default(PENDING)
+  dealClosedNotification NotificationState @default(PENDING)
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("business_leads")
   @@index([status])
 
+}
+
+enum NotificationState {
+  PENDING
+  SENT
+  FAILED
 }
 
 enum Source {
