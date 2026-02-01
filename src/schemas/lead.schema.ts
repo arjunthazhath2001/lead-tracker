@@ -1,7 +1,7 @@
 import {z} from 'zod'
 
 export const createLeadSchema = z.object({
-    companyName: z.string().min(1,'Company name is requred'),
+    companyName: z.string().min(1,'Company name is required'),
 
     contactName: z.string().min(1,'Contact name is required'),
 
@@ -13,11 +13,14 @@ export const createLeadSchema = z.object({
 
 })
 
-export const getLeadsByStatusSchema= z.object({
-    status: z.enum(['NEW', 'CONTACTED', 'CALL_DONE', 'DEAL', 'LOST'])
-})
+export const leadIdParamSchema = z.object({ id:z.coerce.number().int().positive()})
 
-export const updateLeadStatusSchema = z.object({
-    id: z.number(),
-    status: z.enum(['NEW', 'CONTACTED', 'CALL_DONE', 'DEAL', 'LOST'])
-})
+export const statusEnum= z.enum(['NEW', 'CONTACTED', 'CALL_DONE', 'DEAL', 'LOST'])
+export const statusEnumOptional= statusEnum.optional()
+
+
+
+
+export type CreateLeadInput = z.infer<typeof createLeadSchema>;
+export type StatusType= z.infer<typeof statusEnum>
+export type StatusTypeOptional= z.infer<typeof statusEnumOptional>

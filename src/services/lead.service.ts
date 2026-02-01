@@ -1,34 +1,15 @@
-import 'dotenv/config';
+import type { Lead } from '../generated/prisma/client.js';
+import type { CreateLeadInput,StatusType, StatusTypeOptional } from '../schemas/lead.schema.js';
 import { sendSlackNotification } from '../lib/slack.js';
 import { prisma } from '../lib/database.js'
-import type { Lead } from '../generated/prisma/client.js';
 import { LeadNotFoundError, SlackNotificationError } from './lead.errors.js';
 
 
-interface CreateLeadInput{
-    companyName: string;
-    contactName: string;
-    email: string;
-    source:  'LINKEDIN' | 'INTRO' | 'INBOUND' | 'OTHER';
-    status?: 'NEW' | 'CONTACTED' | 'CALL_DONE' | 'DEAL' | 'LOST' | undefined;
-}
-
-interface StatusInput{
-        status: 'NEW' | 'CONTACTED' | 'CALL_DONE' | 'DEAL' | 'LOST';
-}
-
-interface UpdateLeadStatusInput{
-    id: number;
-    status: 'NEW' | 'CONTACTED' | 'CALL_DONE' | 'DEAL' | 'LOST';
-
-}
-
-
-
+//this function creates a lead
 export async function createLead(data: CreateLeadInput): Promise <Lead>{ 
     
     // 1. create lead in pending state
-        const lead = await prisma.lead.create({data:{
+    const lead = await prisma.lead.create({data:{
             ...data,
             status: data.status?? 'NEW', //use provided status, or default to NEW
         },
@@ -56,34 +37,31 @@ export async function createLead(data: CreateLeadInput): Promise <Lead>{
 
     //5. throw this specific error if slack notification fails
 
-        throw new SlackNotificationError(lead.id)
+        throw new SlackNotificationError(lead.id, 'NEW LEAD')
     }
 
 }
 
 
-//this function gets all the leads
-export async function getLeads():Promise<Lead[]>{
-    
-    const readLeads= await prisma.lead.findMany()
-    return readLeads
-}
-
-
 //this function gets only those leads based on the requested 'status' 
-export async function getLeadsByStatus(data:StatusInput):Promise<Lead[]>{
-    const paramStatus = data.status
-    const LeadsByStatus = await prisma.lead.findMany(
-      {where: {status:paramStatus}} 
-    )
-    return LeadsByStatus
+export async function getLeadsByStatus(
+  status?: StatusTypeOptional
+): Promise<Lead[]> {
+  if (!status) {
+    return prisma.lead.findMany();
+  }
 
+  return prisma.lead.findMany({
+    where: { status },
+  });
 }
+
 
 
 //this function updates the status of a lead based for the given lead id
-export async function updateLeadStatus(data:UpdateLeadStatusInput): Promise<Lead>{
-    const { status,id } = data
+export async function updateLeadStatus(data:{ id: number; status: StatusType }): Promise<Lead>{
+
+    const { id,status } = data
 
     const existingLead= await prisma.lead.findUnique({
         where:{id}
@@ -121,7 +99,7 @@ export async function updateLeadStatus(data:UpdateLeadStatusInput): Promise<Lead
 
         // throw this specific error if slack notification fails
 
-            throw new SlackNotificationError(id)
+            throw new SlackNotificationError(id, 'DEAL CLOSED')
         }
 
     }         
