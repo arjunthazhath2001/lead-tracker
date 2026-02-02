@@ -20,6 +20,10 @@ A lead comes in. It sits in someone's inbox. By the time your team finds out, th
 2. **Track progress**: `NEW` → `CONTACTED` → `CALL_DONE` → `DEAL` or `LOST`
 3. **Close the deal** → Team gets notified → Customer exits the sales funnel
 
+### Slack Notification
+
+![Slack notification](https://i.ibb.co/SX94C5z0/Screenshot-2026-02-02-101654.png)
+
 ---
 
 ## Tech Stack
@@ -53,7 +57,7 @@ Import `postman/Business Lead tracker API.postman_collection.json` to test all e
 
 ```bash
 # 1. Clone and setup
-git clone <repo-url>
+git clone https://github.com/arjunthazhath2001/lead-tracker.git
 cd lead-tracker
 
 # 2. Add your Slack webhook
