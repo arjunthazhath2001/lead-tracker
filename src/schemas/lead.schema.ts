@@ -11,12 +11,17 @@ export const createLeadSchema = z.object({
 
     status: z.enum(['NEW', 'CONTACTED', 'CALL_DONE', 'DEAL', 'LOST']).optional(),
 
-})
+}).strict()
 
 export const leadIdParamSchema = z.object({ id:z.coerce.number().int().positive()})
 
 export const statusEnum= z.enum(['NEW', 'CONTACTED', 'CALL_DONE', 'DEAL', 'LOST'])
+
 export const statusEnumOptional= statusEnum.optional()
+
+export const updateLeadStatusSchema = z.object({
+  status: statusEnum
+}).strict();
 
 
 

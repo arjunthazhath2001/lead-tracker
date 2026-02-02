@@ -1,5 +1,5 @@
 import { createLead, getLeadsByStatus, updateLeadStatus } from "../services/lead.service.js"
-import { createLeadSchema, leadIdParamSchema, statusEnum } from "../schemas/lead.schema.js"
+import { createLeadSchema, leadIdParamSchema, statusEnum, updateLeadStatusSchema } from "../schemas/lead.schema.js"
 import { ZodError } from "zod";
 import { LeadNotFoundError, SlackNotificationError } from "../services/lead.errors.js";
 import type { Request,Response } from "express";
@@ -37,6 +37,17 @@ export async function createLeadController(req: Request,res: Response){
 //handles fetching of all business leads by status
 export async function getLeadsByStatusController(req:Request,res:Response){
     try{
+        
+        // Reject array / object attacks
+
+        const queryKeys = Object.keys(req.query);
+
+        if (queryKeys.some(key => key.includes('['))) {
+        return res.status(400).json({
+            message: 'Invalid query parameter format',
+        });
+        }
+
         const status = req.query.status? statusEnum.parse(req.query.status) : undefined;
 
         const leads= await getLeadsByStatus(status)
@@ -61,9 +72,9 @@ export async function updateLeadStatusController(req: Request,res: Response){
     try{
         const {id}= leadIdParamSchema.parse(req.params);
 
-        const body= statusEnum.parse(req.body.status);
+        const { status } = updateLeadStatusSchema.parse(req.body);
         
-        const lead= await updateLeadStatus({id,status:body});
+        const lead= await updateLeadStatus({id,status});
 
         return res.status(200).json({
             lead,
