@@ -6,7 +6,7 @@
 
 ---
 
-## The Problem
+## The Problem Statement
 
 A lead comes in. It sits in someone's inbox. By the time your team finds out, the prospect signed with a competitor.
 
