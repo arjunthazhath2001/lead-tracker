@@ -101,13 +101,13 @@ export async function updateLeadStatusController(req: Request,res: Response){
         }
 
         if(err instanceof SlackNotificationError){
-            return res.status(502).json({
-                message: 'Slack notification failed',
-                leadId: err.leadId,
+            return res.status(200).json({
+                lead: err.lead,
+                warning: 'Lead updated, but Slack notification failed',
                 notificationType: err.type,
             })
         }
-        
+
         if(err instanceof LeadNotFoundError){
             return res.status(404).json({
                 message: err.message,
