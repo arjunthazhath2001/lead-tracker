@@ -26,6 +26,77 @@ A lead comes in. It sits in someone's inbox. By the time your team finds out, th
 
 ---
 
+## Architecture
+
+### High-Level Overview
+
+```mermaid
+flowchart TB
+    subgraph Client
+        Postman[Postman / API Client]
+    end
+
+    subgraph Docker["Docker Compose"]
+        subgraph App["Node.js + Express"]
+            Express[Express Server]
+            Zod[Zod Validation]
+            Prisma[Prisma ORM]
+        end
+
+        subgraph DB["PostgreSQL"]
+            PG[(business_leads)]
+        end
+    end
+
+    subgraph External
+        Slack[Slack Webhook]
+    end
+
+    Postman -->|HTTP Request| Express
+    Express -->|Validate| Zod
+    Zod -->|Query/Mutate| Prisma
+    Prisma -->|SQL| PG
+    Express -->|Notify| Slack
+    Express -->|HTTP Response| Postman
+```
+
+### Request Flow (File to File)
+
+```mermaid
+flowchart LR
+    subgraph Entry
+        server.ts --> app.ts
+    end
+
+    subgraph Routing
+        app.ts --> lead.route.ts
+    end
+
+    subgraph Request["Request Handling"]
+        lead.route.ts --> lead.controller.ts
+    end
+
+    subgraph Validation
+        lead.controller.ts <--> lead.schema.ts
+    end
+
+    subgraph Business["Business Logic"]
+        lead.controller.ts <--> lead.service.ts
+    end
+
+    subgraph Data["Data & Notifications"]
+        lead.service.ts <--> database.ts
+        lead.service.ts <--> slack.ts
+    end
+
+    subgraph External
+        database.ts <--> PostgreSQL[(PostgreSQL)]
+        slack.ts --> SlackAPI[Slack API]
+    end
+```
+
+---
+
 ## Tech Stack
 
 | Component | Technology |
