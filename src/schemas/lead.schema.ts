@@ -1,9 +1,9 @@
 import {z} from 'zod'
 
 export const createLeadSchema = z.object({
-    companyName: z.string().min(1,'Company name is required'),
+    companyName: z.string().min(1,'Company name is required').max(200, 'Company name must be 200 characters or less'),
 
-    contactName: z.string().min(1,'Contact name is required'),
+    contactName: z.string().min(1,'Contact name is required').max(100, 'Contact name must be 100 characters or less'),
 
     email: z.email('Invalid email address'),
 
