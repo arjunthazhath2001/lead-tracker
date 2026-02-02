@@ -263,6 +263,7 @@ This means:
 
 - **Single user, no auth** — Internal tool for small teams. Auth is a future enhancement.
 - **Selective notifications** — Only for `NEW` leads and `DEAL` closures. No Slack spam.
+- **No unit tests** — The Postman collection provides exhaustive API-level testing covering happy paths, validation errors, domain errors, and system failures. For a focused backend like this, API tests offer better coverage-to-effort ratio than unit tests.
 
 ---
 
