@@ -111,7 +111,8 @@
           },
           "response": []
         }
-      ]
+      ],
+      "description": "## **01 – Happy Paths**\n\n**Purpose**  \n  \nThis folder contains all requests that represent valid, expected usage of the Business Lead Tracker API.\n\n**What this folder proves**\n\n- The API works correctly when given valid inputs\n    \n- Core business flows behave as intended\n    \n- State transitions succeed without errors\n    \n\n**What to expect**\n\n- Successful lead creation\n    \n- Successful lead retrieval\n    \n- Valid status updates (for example, NEW → DEAL)\n    \n- Correct response payloads and HTTP 2xx status codes\n    \n\n**Audience**\n\n- Reviewers who want to quickly verify the API works\n    \n- New contributors exploring normal API behavior\n    \n- Manual smoke testing"
     },
     {
       "name": "02 – Validation & Client Errors",
@@ -514,7 +515,8 @@
           },
           "response": []
         }
-      ]
+      ],
+      "description": "## **02 – Validation & Client Errors**\n\n**Purpose**  \n  \nThis folder tests how the API handles invalid input sent by clients.\n\n**What this folder proves**\n\n- Request validation is enforced at the API boundary\n    \n- Bad client input is rejected early\n    \n- Errors are returned with clear, meaningful messages\n    \n- The API does not allow malformed data to reach business logic or the database\n    \n\n**What is covered**\n\n- Missing required fields\n    \n- Invalid data formats (email, enums, types)\n    \n- Invalid query parameters\n    \n- Extra or unexpected fields in request payloads\n    \n\n**Expected behavior**\n\n- HTTP 400 responses\n    \n- Structured validation error messages\n    \n- No side effects (no DB writes, no notifications)"
     },
     {
       "name": "03 – Resource & Domain Errors",
@@ -606,7 +608,8 @@
           },
           "response": []
         }
-      ]
+      ],
+      "description": "## **03 – Resource & Domain Errors**\n\n**Purpose**  \n  \nThis folder tests failures related to application state, domain rules, and resource existence.\n\n**What this folder proves**\n\n- Domain constraints are enforced correctly\n    \n- The API responds appropriately to real-world business edge cases\n    \n- Errors caused by data state (not malformed input) are handled explicitly\n    \n\n**What is covered**\n\n- Non-existent resource access (for example, updating a missing lead)\n    \n- Duplicate resource creation (unique email constraint)\n    \n- Idempotent operations (for example, updating a lead already in DEAL state)\n    \n- Domain-level conflicts and assumptions\n    \n\n**Expected behavior**\n\n- HTTP 404, 409, or meaningful domain-specific responses\n    \n- Clear differentiation between client mistakes and domain violations\n    \n- No silent failures or misleading success responses"
     },
     {
       "name": "04 – System Guarantees",
@@ -668,7 +671,8 @@
           },
           "response": []
         }
-      ]
+      ],
+      "description": "## **04 – System Guarantees**\n\n**Purpose**  \n  \nThis folder validates system-level guarantees and resilience under partial failures.\n\n**What this folder proves**\n\n- The system behaves predictably when external dependencies fail\n    \n- Core data integrity is preserved even if side effects fail\n    \n- Failed side effects can be retried safely\n    \n\n**What is covered**\n\n- Slack notification failures (misconfigured or unavailable webhook)\n    \n- Retry behavior after external system recovery\n    \n- Separation of business state from notification delivery\n    \n- Idempotent retry logic for failed notifications\n    \n\n**Expected behavior**\n\n- Primary business operations succeed even if external services fail\n    \n- Side-effect failures are tracked explicitly (FAILED / SENT)\n    \n- Retrying the same request after recovery triggers the pending side effect correctly"
     }
   ]
 }
