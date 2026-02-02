@@ -31,33 +31,10 @@ A lead comes in. It sits in someone's inbox. By the time your team finds out, th
 ### High-Level Overview
 
 ```mermaid
-flowchart TB
-    subgraph Client
-        Postman[Postman / API Client]
-    end
-
-    subgraph Docker["Docker Compose"]
-        subgraph App["Node.js + Express"]
-            Express[Express Server]
-            Zod[Zod Validation]
-            Prisma[Prisma ORM]
-        end
-
-        subgraph DB["PostgreSQL"]
-            PG[(business_leads)]
-        end
-    end
-
-    subgraph External
-        Slack[Slack Webhook]
-    end
-
-    Postman -->|HTTP Request| Express
-    Express -->|Validate| Zod
-    Zod -->|Query/Mutate| Prisma
-    Prisma -->|SQL| PG
-    Express -->|Notify| Slack
-    Express -->|HTTP Response| Postman
+flowchart LR
+    Client[API Client] -->|HTTP| Express[Express + Zod]
+    Express -->|Prisma| DB[(PostgreSQL)]
+    Express -->|Webhook| Slack[Slack]
 ```
 
 ### Request Flow (File to File)
