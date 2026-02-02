@@ -8,8 +8,11 @@ RUN npm ci
 COPY prisma ./prisma
 COPY . .
 
-RUN npm run build
+# Generate Prisma client first (creates src/generated/prisma)
 RUN npx prisma generate
+
+# Then compile TypeScript
+RUN npm run build
 
 EXPOSE 3001
 
