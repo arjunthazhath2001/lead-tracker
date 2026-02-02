@@ -178,6 +178,10 @@ SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL
 
 ### Step 3: Start the Application
 
+
+> [!NOTE]
+> Make sure that your docker engine is up and running. Else the below command wont be executed.
+
 ```bash
 docker-compose up --build
 ```
