@@ -234,6 +234,7 @@ This backend service was built with the following assumptions in mind:
 - A company may have multiple leads, each identified by a **unique email address**
 - Email uniqueness is enforced at the database level
 - Multiple contacts from the same company are supported as long as their emails differ
+- A lead can be created directly with any status (including `DEAL`) — if created as `DEAL`, both "new lead" and "deal closed" notifications are sent
 
 ### State Transitions
 
