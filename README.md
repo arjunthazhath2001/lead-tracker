@@ -100,23 +100,7 @@ This project uses **PostgreSQL** with **Prisma ORM** and the `@prisma/adapter-pg
 
 Currently, the app uses a single `Lead` table — sufficient for the domain without premature complexity. If it scales, we can normalize into additional tables (Companies, Contacts, Activities) later.
 
-### Entity-Relationship Diagram
-
-```mermaid
-erDiagram
-    business_leads {
-        int id PK "Auto-increment"
-        string companyName
-        string contactName
-        string email UK "Unique"
-        Source source "LINKEDIN | INTRO | INBOUND | OTHER"
-        Status status "NEW | CONTACTED | CALL_DONE | DEAL | LOST"
-        NotificationState newLeadNotification "PENDING | SENT | FAILED"
-        NotificationState dealClosedNotification "PENDING | SENT | FAILED"
-        datetime createdAt "Auto-generated"
-        datetime updatedAt "Auto-updated"
-    }
-```
+### Database Schema
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
@@ -133,58 +117,38 @@ erDiagram
 
 ---
 
-## API Endpoints
+## Getting Started
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/leads` | Create a new lead |
-| `GET` | `/leads` | Get all leads (optionally filter by `?status=NEW`) |
-| `PATCH` | `/leads/:id` | Update lead status |
-
-### API Testing with Postman
-
-This repository includes a comprehensive Postman collection that demonstrates:
-
-- Happy path API usage
-- Input validation errors
-- Domain and resource errors (duplicate email, lead not found)
-- System failure scenarios (Slack webhook failure)
-- Retry behavior after system recovery
-
-**How to use:**
-
-1. Start the application (`docker-compose up --build`)
-2. Open Postman → Click **Import**
-3. Select `postman/Business Lead tracker API.postman_collection.json`
-4. Set base URL to `http://localhost:3001`
-5. Execute requests to explore system behavior
-
-The collection serves as both documentation and an executable test suite.
-
----
-
-## Prerequisites
+### Prerequisites
 
 | Requirement | Installation |
 |-------------|--------------|
 | **Docker** | [docker.com/get-docker](https://www.docker.com/get-docker) |
 | **Docker Compose** | Included with Docker Desktop (Mac/Windows). Linux: `sudo apt install docker-compose` |
 | **Git** | [git-scm.com](https://git-scm.com/) |
+| **Postman** | [postman.com/downloads](https://www.postman.com/downloads/) (for API testing) |
 
 Optional: [VS Code](https://code.visualstudio.com/) or any code editor to view/edit files.
 
----
+### Step 1: Get a Slack Webhook URL
 
-## Quick Start
+Before running the app, you need a Slack Incoming Webhook:
 
-### 1. Clone the repo
+1. Go to [api.slack.com/apps](https://api.slack.com/apps) → Click **Create New App** → Choose **From scratch**
+2. Go to **Incoming Webhooks** → Toggle **Activate Incoming Webhooks** to **On**
+3. Click **Add New Webhook to Workspace** → Select your channel → Click **Authorize**
+4. Copy the webhook URL (looks like `https://hooks.slack.com/services/T.../B.../xxx`)
+
+📚 [Official Slack Webhook Documentation](https://docs.slack.dev/messaging/sending-messages-using-incoming-webhooks/)
+
+### Step 2: Clone and Configure
 
 ```bash
 git clone https://github.com/arjunthazhath2001/lead-tracker.git
 cd lead-tracker
 ```
 
-### 2. Create `.env` file with your Slack webhook
+Create a `.env` file with your Slack webhook:
 
 **Mac / Linux:**
 ```bash
@@ -206,43 +170,48 @@ Or just create a `.env` file manually and paste:
 SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL
 ```
 
-### 3. Start the application
+### Step 3: Start the Application
 
 ```bash
 docker-compose up --build
 ```
 
-### 4. Run migrations (first time only)
+This will:
+- Pull PostgreSQL 15 image
+- Build the Node.js application
+- Run database migrations automatically
+- Start the API server
 
-```bash
-docker exec -it lead-tracker-app npx prisma migrate deploy
-```
+**API is ready at `http://localhost:3001`**
 
-API runs at `http://localhost:3001`
+### Step 4: Test with Postman
+
+1. Open Postman → Click **Import**
+2. Select `postman/Business Lead tracker API.postman_collection.json`
+3. Set base URL to `http://localhost:3001`
+4. Execute requests to test the API
 
 ---
 
-## Slack Webhook Setup
+## API Endpoints
 
-To receive notifications, you need a Slack Incoming Webhook URL. Here's how to get one:
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/leads` | Create a new lead |
+| `GET` | `/leads` | Get all leads (optionally filter by `?status=NEW`) |
+| `PATCH` | `/leads/:id` | Update lead status |
 
-1. **Create a Slack App** — Go to [api.slack.com/apps](https://api.slack.com/apps) → Click **Create New App** → Choose **From scratch** → Name it and select your workspace
+### API Testing with Postman
 
-2. **Enable Incoming Webhooks** — In your app settings, go to **Incoming Webhooks** → Toggle **Activate Incoming Webhooks** to **On**
+The included Postman collection demonstrates:
 
-3. **Create a Webhook** — Click **Add New Webhook to Workspace** → Select the channel where you want notifications → Click **Authorize**
+- Happy path API usage
+- Input validation errors
+- Domain and resource errors (duplicate email, lead not found)
+- System failure scenarios (Slack webhook failure)
+- Retry behavior after system recovery
 
-4. **Copy the URL** — You'll get a URL like:
-   ```
-   https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
-   ```
-
-5. **Add to `.env`** — Paste it in your `.env` file:
-   ```
-   SLACK_WEBHOOK_URL=https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
-   ```
-
-📚 [Official Slack Webhook Documentation](https://docs.slack.dev/messaging/sending-messages-using-incoming-webhooks/)
+The collection serves as both documentation and an executable test suite.
 
 ---
 
