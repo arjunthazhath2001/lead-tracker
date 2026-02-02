@@ -102,6 +102,8 @@ Currently, the app uses a single `Lead` table — sufficient for the domain with
 
 ### Database Schema
 
+> **Note:** No ERD diagram is included since the app uses a single `Lead` table with no relationships to other tables.
+
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
 | `id` | `INT` | `PRIMARY KEY`, Auto-increment | Unique identifier |
@@ -228,7 +230,9 @@ This backend service was built with the following assumptions in mind:
 ### State Transitions
 
 - Lead status transitions are **flexible** — you can move back from `DEAL` to earlier states if business circumstances change
-- Status updates are **idempotent** — re-submitting the same status doesn't create side effects unless needed for recovery
+- Status updates are **idempotent** — re-submitting the same status doesn't create side effects, but will retry failed notifications
+
+**Retry scenario:** If a lead is created but the Slack webhook is misconfigured, the lead is saved with `newLeadNotification = FAILED`. Once the webhook URL is corrected, updating the status to `NEW` (even though it's already `NEW`) will retry the notification. The same applies for `DEAL` status — if the deal notification fails, updating to `DEAL` again will retry it. This works because `newLeadNotification` and `dealClosedNotification` track notification state independently from lead status.
 
 ### Notification Handling
 
