@@ -41,6 +41,10 @@ A lead comes in. It sits in someone's inbox. By the time your team finds out, th
 2. **Track progress**: `NEW` → `CONTACTED` → `CALL_DONE` → `DEAL` or `LOST`
 3. **Close the deal** → Team gets notified → Customer exits the sales funnel
 
+### Potential Frontend
+
+![Frontend mockup](https://i.ibb.co/k2dm5Nwn/Screenshot-2026-02-02-163145.png)
+
 ### Slack Notification
 
 ![Slack notification](https://i.ibb.co/SX94C5z0/Screenshot-2026-02-02-101654.png)
