@@ -29,8 +29,8 @@ export async function createLeadController(req: Request,res: Response){
         }
 
         if(err instanceof SlackNotificationError){
-            return res.status(502).json({
-                message: 'Slack notification failed',
+            return res.status(201).json({
+                message: 'Lead created, but Slack notification failed',
                 leadId: err.leadId,
                 notificationType: err.type,
             })

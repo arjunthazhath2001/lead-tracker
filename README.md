@@ -279,6 +279,8 @@ This means:
 - [ ] Activity history & audit log
 - [ ] React/Next.js dashboard
 - [ ] Analytics & conversion tracking
+- [ ] Pagination for GET /leads endpoint
+- [ ] Rate limiting as the app scales
 
 ---
 
