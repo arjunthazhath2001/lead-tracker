@@ -1,5 +1,13 @@
 # Business Lead Tracker
 
+![Node.js](https://img.shields.io/badge/Node.js-22-339933?logo=nodedotjs&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![Express](https://img.shields.io/badge/Express-5-000000?logo=express&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?logo=postgresql&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-7-2D3748?logo=prisma&logoColor=white)
+![Zod](https://img.shields.io/badge/Zod-4-3E67B1?logo=zod&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
+
 > *"The name of the game... is getting them to say yes."*
 
 ![Belfort making his first call](https://vascopatricio.com/wp-content/uploads/2022/10/TheWolfOfWallStreet-00.19.45-Belfort-making-his-first-call.png)
@@ -92,7 +100,8 @@ Currently, the app uses a single `Lead` table — sufficient for the domain with
 
 ### Database Schema
 
-> **Note:** No ERD diagram is included since the app uses a single `Lead` table with no relationships to other tables.
+> [!NOTE]
+> No ERD diagram is included since the app uses a single `Lead` table with no relationships to other tables.
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
@@ -131,7 +140,8 @@ Before running the app, you need a Slack Incoming Webhook:
 3. Click **Add New Webhook to Workspace** → Select your channel → Click **Authorize**
 4. Copy the webhook URL (looks like `https://hooks.slack.com/services/T.../B.../xxx`)
 
-📚 [Official Slack Webhook Documentation](https://docs.slack.dev/messaging/sending-messages-using-incoming-webhooks/)
+> [!TIP]
+> 📚 [Official Slack Webhook Documentation](https://docs.slack.dev/messaging/sending-messages-using-incoming-webhooks/)
 
 ### Step 2: Clone and Configure
 
@@ -174,7 +184,8 @@ This will:
 - Run database migrations automatically
 - Start the API server
 
-**API is ready at `http://localhost:3001`**
+> [!IMPORTANT]
+> API is ready at `http://localhost:3001`
 
 ### Step 4: Test with Postman
 
@@ -241,7 +252,8 @@ This means:
 - Failed notifications are explicitly tracked and can be retried
 - The `PATCH /leads/:id` endpoint automatically retries failed notifications
 
-**The database is the source of truth. Slack is the delivery mechanism.**
+> [!IMPORTANT]
+> The database is the source of truth. Slack is the delivery mechanism.
 
 ### Other Decisions
 
