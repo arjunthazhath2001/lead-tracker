@@ -86,18 +86,58 @@ export async function updateLeadStatus(
     throw new LeadNotFoundError(id);
   }
 
-  // 🟡 NO-OP: status is already the same
-  if (existingLead.status === status) {
+  const isSameStatus = existingLead.status === status;
+
+  const needsNewLeadNotification =
+    status === 'NEW' &&
+    existingLead.newLeadNotification !== 'SENT';
+
+  const needsDealNotification =
+    status === 'DEAL' &&
+    existingLead.dealClosedNotification !== 'SENT';
+
+  const needsAnyNotification =
+    needsNewLeadNotification || needsDealNotification;
+
+  // True NO-OP: no state change AND no pending side-effects
+  if (isSameStatus && !needsAnyNotification) {
     return { lead: existingLead, changed: false };
   }
 
-  const updatedLead = await prisma.lead.update({
-    where: { id },
-    data: { status },
-  });
+  // Update status only if it actually changed
+  const updatedLead = isSameStatus
+    ? existingLead
+    : await prisma.lead.update({
+        where: { id },
+        data: { status },
+      });
 
-  // 🔔 Transition → DEAL
-  if (existingLead.status !== 'DEAL' && status === 'DEAL') {
+  // Retry NEW lead notification
+  if (needsNewLeadNotification) {
+    try {
+      await sendSlackNotification(
+        `New business lead from ${updatedLead.companyName}, Contact: ${updatedLead.contactName}, Email: ${updatedLead.email}`
+      );
+
+      const confirmed = await prisma.lead.update({
+        where: { id },
+        data: { newLeadNotification: 'SENT' },
+      });
+
+      return { lead: confirmed, changed: !isSameStatus };
+
+    } catch {
+      await prisma.lead.update({
+        where: { id },
+        data: { newLeadNotification: 'FAILED' },
+      });
+
+      throw new SlackNotificationError(id, 'NEW LEAD');
+    }
+  }
+
+  // Retry DEAL notification
+  if (needsDealNotification) {
     try {
       await sendSlackNotification(
         `Business lead from ${updatedLead.companyName} has been closed! Congrats!!`
@@ -108,7 +148,7 @@ export async function updateLeadStatus(
         data: { dealClosedNotification: 'SENT' },
       });
 
-      return { lead: confirmed, changed: true };
+      return { lead: confirmed, changed: !isSameStatus };
 
     } catch {
       await prisma.lead.update({
@@ -120,5 +160,5 @@ export async function updateLeadStatus(
     }
   }
 
-  return { lead: updatedLead, changed: true };
+  return { lead: updatedLead, changed: !isSameStatus };
 }
