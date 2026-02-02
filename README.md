@@ -207,6 +207,7 @@ This will:
 To view and explore your database tables in a GUI (no PG Admin needed):
 
 ```bash
+npm install
 npx prisma studio
 ```
 
