@@ -143,12 +143,12 @@ export async function updateLeadStatus(
       return { lead: confirmed, changed: !isSameStatus };
 
     } catch {
-      await prisma.lead.update({
+      const failedLead = await prisma.lead.update({
         where: { id },
         data: { newLeadNotification: 'FAILED' },
       });
 
-      throw new SlackNotificationError(id, 'NEW LEAD');
+      throw new SlackNotificationError(id, 'NEW LEAD', failedLead);
     }
   }
 
@@ -167,12 +167,12 @@ export async function updateLeadStatus(
       return { lead: confirmed, changed: !isSameStatus };
 
     } catch {
-      await prisma.lead.update({
+      const failedLead = await prisma.lead.update({
         where: { id },
         data: { dealClosedNotification: 'FAILED' },
       });
 
-      throw new SlackNotificationError(id, 'DEAL CLOSED');
+      throw new SlackNotificationError(id, 'DEAL CLOSED', failedLead);
     }
   }
 
