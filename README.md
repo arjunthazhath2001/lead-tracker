@@ -47,9 +47,25 @@ A lead comes in. It sits in someone's inbox. By the time your team finds out, th
 | `GET` | `/leads` | Get all leads (optionally filter by `?status=NEW`) |
 | `PATCH` | `/leads/:id` | Update lead status |
 
-### Postman Collection
+### API Testing with Postman
 
-Import `postman/Business Lead tracker API.postman_collection.json` to test all endpoints.
+This repository includes a comprehensive Postman collection that demonstrates:
+
+- Happy path API usage
+- Input validation errors
+- Domain and resource errors (duplicate email, lead not found)
+- System failure scenarios (Slack webhook failure)
+- Retry behavior after system recovery
+
+**How to use:**
+
+1. Start the application (`docker-compose up --build`)
+2. Open Postman → Click **Import**
+3. Select `postman/Business Lead tracker API.postman_collection.json`
+4. Set base URL to `http://localhost:3001`
+5. Execute requests to explore system behavior
+
+The collection serves as both documentation and an executable test suite.
 
 ---
 
@@ -60,7 +76,7 @@ Import `postman/Business Lead tracker API.postman_collection.json` to test all e
 git clone https://github.com/arjunthazhath2001/lead-tracker.git
 cd lead-tracker
 
-# 2. Add your Slack webhook
+# 2. Add your Slack webhook (see setup below)
 echo 'SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL' > .env
 
 # 3. Start everything
@@ -74,12 +90,56 @@ API runs at `http://localhost:3001`
 
 ---
 
+## Slack Webhook Setup
+
+To receive notifications, you need a Slack Incoming Webhook URL. Here's how to get one:
+
+1. **Create a Slack App** — Go to [api.slack.com/apps](https://api.slack.com/apps) → Click **Create New App** → Choose **From scratch** → Name it and select your workspace
+
+2. **Enable Incoming Webhooks** — In your app settings, go to **Incoming Webhooks** → Toggle **Activate Incoming Webhooks** to **On**
+
+3. **Create a Webhook** — Click **Add New Webhook to Workspace** → Select the channel where you want notifications → Click **Authorize**
+
+4. **Copy the URL** — You'll get a URL like:
+   ```
+   https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
+   ```
+
+5. **Add to `.env`** — Paste it in your `.env` file:
+   ```
+   SLACK_WEBHOOK_URL=https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
+   ```
+
+📚 [Official Slack Webhook Documentation](https://docs.slack.dev/messaging/sending-messages-using-incoming-webhooks/)
+
+---
+
 ## Design Decisions
+
+### Why We Track Notification State
+
+The core value of this app is **instant team notification**. A lead that nobody knows about is a lead that gets lost.
+
+Most apps treat notifications as fire-and-forget: send it and hope it works. We don't. **Slack notifications are a critical business event**, so we persist their state in the database:
+
+| State | Meaning |
+|-------|---------|
+| `PENDING` | Lead created, notification not yet attempted |
+| `SENT` | Slack notification delivered successfully |
+| `FAILED` | Slack was down or unreachable — needs retry |
+
+This means:
+- If Slack fails, **the lead is still saved** (we don't lose business data)
+- We know exactly which notifications failed and can retry them
+- The `PATCH /leads/:id` endpoint automatically retries failed notifications when you update a lead
+
+**The database is the source of truth. Slack is the delivery mechanism.**
+
+### Other Decisions
 
 - **Single user, no auth** — Internal tool for small teams. Auth is a future enhancement.
 - **Reversible statuses** — Deals fall through. Lost leads come back. Reality isn't linear.
 - **Selective notifications** — Only for `NEW` leads and `DEAL` closures. No Slack spam.
-- **Notification failures don't block saves** — Database is the source of truth. Slack is best-effort.
 - **Unique emails** — Duplicates return `409 Conflict`.
 
 ---
