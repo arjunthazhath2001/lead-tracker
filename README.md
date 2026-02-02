@@ -6,6 +6,19 @@
 
 ---
 
+## Table of Contents
+
+1. [The Problem Statement](#the-problem-statement)
+2. [How It Works](#how-it-works)
+3. [Architecture](#architecture)
+4. [Tech Stack](#tech-stack)
+5. [Getting Started](#getting-started)
+6. [API Endpoints](#api-endpoints)
+7. [Assumptions & Design Decisions](#assumptions--design-decisions)
+8. [Future Improvements](#future-improvements)
+
+---
+
 ## The Problem Statement
 
 A lead comes in. It sits in someone's inbox. By the time your team finds out, the prospect signed with a competitor.
