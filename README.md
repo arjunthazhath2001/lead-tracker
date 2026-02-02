@@ -100,6 +100,37 @@ This project uses **PostgreSQL** with **Prisma ORM** and the `@prisma/adapter-pg
 
 Currently, the app uses a single `Lead` table — sufficient for the domain without premature complexity. If it scales, we can normalize into additional tables (Companies, Contacts, Activities) later.
 
+### Entity-Relationship Diagram
+
+```mermaid
+erDiagram
+    business_leads {
+        int id PK "Auto-increment"
+        string companyName
+        string contactName
+        string email UK "Unique"
+        Source source "LINKEDIN | INTRO | INBOUND | OTHER"
+        Status status "NEW | CONTACTED | CALL_DONE | DEAL | LOST"
+        NotificationState newLeadNotification "PENDING | SENT | FAILED"
+        NotificationState dealClosedNotification "PENDING | SENT | FAILED"
+        datetime createdAt "Auto-generated"
+        datetime updatedAt "Auto-updated"
+    }
+```
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| `id` | `INT` | `PRIMARY KEY`, Auto-increment | Unique identifier |
+| `companyName` | `STRING` | Required | Company name |
+| `contactName` | `STRING` | Required | Contact person's name |
+| `email` | `STRING` | `UNIQUE`, Required | Contact email (prevents duplicates) |
+| `source` | `ENUM` | Required | Lead source: `LINKEDIN`, `INTRO`, `INBOUND`, `OTHER` |
+| `status` | `ENUM` | Default: `NEW` | Lead status: `NEW`, `CONTACTED`, `CALL_DONE`, `DEAL`, `LOST` |
+| `newLeadNotification` | `ENUM` | Default: `PENDING` | Slack notification state for new lead |
+| `dealClosedNotification` | `ENUM` | Default: `PENDING` | Slack notification state for deal closure |
+| `createdAt` | `DATETIME` | Auto-generated | Record creation timestamp |
+| `updatedAt` | `DATETIME` | Auto-updated | Last modification timestamp |
+
 ---
 
 ## API Endpoints
@@ -215,7 +246,9 @@ To receive notifications, you need a Slack Incoming Webhook URL. Here's how to g
 
 ---
 
-## Design Decisions
+## Assumptions & Design Decisions
+
+This backend service was built with the following assumptions in mind:
 
 ### Lead & Company Modeling
 
