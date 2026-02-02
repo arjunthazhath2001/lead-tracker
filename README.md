@@ -198,6 +198,16 @@ This will:
 3. Set base URL to `http://localhost:3001`
 4. Execute requests to test the API
 
+### Step 5: View Database (Optional)
+
+To view and explore your database tables in a GUI (no PG Admin needed):
+
+```bash
+npx prisma studio
+```
+
+This opens a browser-based interface at `http://localhost:5555` where you can see leads being created and updated in real-time.
+
 ---
 
 ## API Endpoints
