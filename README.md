@@ -12,9 +12,7 @@
 
 ![Belfort making his first call](https://vascopatricio.com/wp-content/uploads/2022/10/TheWolfOfWallStreet-00.19.45-Belfort-making-his-first-call.png)
 
-### Watch the Explainer Video
-
-[![Watch the Explainer Video](https://img.youtube.com/vi/jEzW0Na78nA/maxresdefault.jpg)](https://youtu.be/jEzW0Na78nA)
+### ▶️ [Watch the Explainer Video](https://youtu.be/jEzW0Na78nA)
 
 ---
 
