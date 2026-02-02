@@ -1,7 +1,7 @@
 import { createLead, getLeadsByStatus, updateLeadStatus } from "../services/lead.service.js"
 import { createLeadSchema, leadIdParamSchema, statusEnum, updateLeadStatusSchema } from "../schemas/lead.schema.js"
 import { ZodError } from "zod";
-import { LeadNotFoundError, SlackNotificationError } from "../services/lead.errors.js";
+import { DuplicateLeadEmailError, LeadNotFoundError, SlackNotificationError } from "../services/lead.errors.js";
 import type { Request,Response } from "express";
 
 
@@ -19,6 +19,13 @@ export async function createLeadController(req: Request,res: Response){
             return res.status(400).json({
                 errors: err.message                
             })
+        }
+
+        if (err instanceof DuplicateLeadEmailError) {
+            return res.status(409).json({
+                message: err.message,
+                email: err.email,
+            });
         }
 
         if(err instanceof SlackNotificationError){
@@ -74,13 +81,20 @@ export async function updateLeadStatusController(req: Request,res: Response){
 
         const { status } = updateLeadStatusSchema.parse(req.body);
         
-        const lead= await updateLeadStatus({id,status});
+        const result= await updateLeadStatus({id,status});
+        if (!result.changed) {
+            return res.status(200).json({
+                lead: result.lead,
+                message: 'Lead was already in this status',
+            });
+            }
 
-        return res.status(200).json({
-            lead,
-        });
-    } catch(err){
-        if(err instanceof ZodError){
+            return res.status(200).json({
+            lead: result.lead,
+            });
+        } catch(err){
+    
+            if(err instanceof ZodError){
             return res.status(400).json({
                 errors: err.message                
             })

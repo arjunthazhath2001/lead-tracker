@@ -11,3 +11,13 @@ export class LeadNotFoundError extends Error {
         this.name= 'LeadNotFoundError';
     }
 }
+
+export class DuplicateLeadEmailError extends Error {
+  email: string;
+
+  constructor(email: string) {
+    super(`Lead with email ${email} already exists`);
+    this.name = 'DuplicateLeadEmailError';
+    this.email = email;
+  }
+}

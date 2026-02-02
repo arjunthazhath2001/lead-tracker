@@ -2,46 +2,61 @@ import type { Lead } from '../generated/prisma/client.js';
 import type { CreateLeadInput,StatusType, StatusTypeOptional } from '../schemas/lead.schema.js';
 import { sendSlackNotification } from '../lib/slack.js';
 import { prisma } from '../lib/database.js'
-import { LeadNotFoundError, SlackNotificationError } from './lead.errors.js';
+import { DuplicateLeadEmailError, LeadNotFoundError, SlackNotificationError } from './lead.errors.js';
 
 
 //this function creates a lead
-export async function createLead(data: CreateLeadInput): Promise <Lead>{ 
-    
-    // 1. create lead in pending state
-    const lead = await prisma.lead.create({data:{
-            ...data,
-            status: data.status?? 'NEW', //use provided status, or default to NEW
-        },
-    })
-        
-    try{
-    //2. Send notification to slack
-        await sendSlackNotification(`New business lead from ${data.companyName}, Contact name: ${data.contactName} , Contact email: ${data.email}. We must close this deal guys!!!! Come on!`);
-    
-    //3. Mark as sent
-        const confirmation= await prisma.lead.update({
-            where: { id: lead.id},
-            data: {newLeadNotification: 'SENT'},
-        });
+export async function createLead(data: CreateLeadInput): Promise<Lead> {
+  let lead;
 
-        return confirmation;
+  try {
+    // 1. Create lead (DB is the source of truth)
+    lead = await prisma.lead.create({
+      data: {
+        ...data,
+        status: data.status ?? 'NEW',
+      },
+    });
 
-    } catch(error){
-    //4. Mark as FAILED
-        await prisma.lead.update({
-            where:{ id: lead.id },
-            data: {newLeadNotification: 'FAILED' },
+    // 2. Send Slack notification
+    await sendSlackNotification(
+      `New business lead from ${data.companyName}, 
+       Contact name: ${data.contactName}, 
+       Contact email: ${data.email}.`
+    );
 
-        });
+    // 3. Mark notification as SENT
+    return await prisma.lead.update({
+      where: { id: lead.id },
+      data: { newLeadNotification: 'SENT' },
+    });
 
-    //5. throw this specific error if slack notification fails
-
-        throw new SlackNotificationError(lead.id, 'NEW LEAD')
+  } catch (err) {
+    //  Duplicate email (domain error)
+    if (
+        err &&
+        typeof err === 'object' &&
+        'code' in err &&
+        err.code === 'P2002'
+    ) {
+        throw new DuplicateLeadEmailError(data.email);
     }
 
-}
 
+    //  Slack failure (resource error)
+    if (lead) {
+      await prisma.lead.update({
+        where: { id: lead.id },
+        data: { newLeadNotification: 'FAILED' },
+      });
+
+      throw new SlackNotificationError(lead.id, 'NEW LEAD');
+    }
+
+    //  Anything else is truly unexpected
+    throw err;
+  }
+}
 
 //this function gets only those leads based on the requested 'status' 
 export async function getLeadsByStatus(
@@ -59,52 +74,51 @@ export async function getLeadsByStatus(
 
 
 //this function updates the status of a lead based for the given lead id
-export async function updateLeadStatus(data:{ id: number; status: StatusType }): Promise<Lead>{
+export async function updateLeadStatus(
+  data: { id: number; status: StatusType }
+): Promise<{ lead: Lead; changed: boolean }> {
 
-    const { id,status } = data
+  const { id, status } = data;
 
-    const existingLead= await prisma.lead.findUnique({
-        where:{id}
-    })
+  const existingLead = await prisma.lead.findUnique({ where: { id } });
 
-    if(!existingLead){
-        throw new LeadNotFoundError(id)
+  if (!existingLead) {
+    throw new LeadNotFoundError(id);
+  }
+
+  // 🟡 NO-OP: status is already the same
+  if (existingLead.status === status) {
+    return { lead: existingLead, changed: false };
+  }
+
+  const updatedLead = await prisma.lead.update({
+    where: { id },
+    data: { status },
+  });
+
+  // 🔔 Transition → DEAL
+  if (existingLead.status !== 'DEAL' && status === 'DEAL') {
+    try {
+      await sendSlackNotification(
+        `Business lead from ${updatedLead.companyName} has been closed! Congrats!!`
+      );
+
+      const confirmed = await prisma.lead.update({
+        where: { id },
+        data: { dealClosedNotification: 'SENT' },
+      });
+
+      return { lead: confirmed, changed: true };
+
+    } catch {
+      await prisma.lead.update({
+        where: { id },
+        data: { dealClosedNotification: 'FAILED' },
+      });
+
+      throw new SlackNotificationError(id, 'DEAL CLOSED');
     }
+  }
 
-    const updatedLead= await prisma.lead.update(
-    { data: {status:status}, 
-      where: {id} 
-    })
-
-
-
-    if (existingLead.status !== "DEAL" && status==="DEAL"){
-         try{
-        // Send notification to slack
-            await sendSlackNotification(`Business lead from ${updatedLead.companyName} has been closed! Congrats!!`);
-        
-        // Mark as sent
-            return await prisma.lead.update({
-                where: { id },
-                data: {dealClosedNotification: 'SENT'},
-            });
-
-        } catch(error){
-        // Mark as FAILED
-            await prisma.lead.update({
-                where:{ id },
-                data: {dealClosedNotification: 'FAILED' },
-
-            });
-
-        // throw this specific error if slack notification fails
-
-            throw new SlackNotificationError(id, 'DEAL CLOSED')
-        }
-
-    }         
-        return updatedLead
-    
+  return { lead: updatedLead, changed: true };
 }
-
-    
