@@ -37,6 +37,17 @@ A lead comes in. It sits in someone's inbox. By the time your team finds out, th
 | Notifications | Slack Webhooks |
 | Containerization | Docker Compose |
 
+### Database & ORM
+
+This project uses **PostgreSQL** with **Prisma ORM** and the `@prisma/adapter-pg` for data access.
+
+**Why a relational database?**
+- The data model is highly structured
+- Constraints like unique email enforcement are important
+- Strong consistency guarantees are required for lead state transitions and notifications
+
+Currently, the app uses a single `Lead` table — sufficient for the domain without premature complexity. If it scales, we can normalize into additional tables (Companies, Contacts, Activities) later.
+
 ---
 
 ## API Endpoints
@@ -116,11 +127,22 @@ To receive notifications, you need a Slack Incoming Webhook URL. Here's how to g
 
 ## Design Decisions
 
-### Why We Track Notification State
+### Lead & Company Modeling
+
+- A company may have multiple leads, each identified by a **unique email address**
+- Email uniqueness is enforced at the database level
+- Multiple contacts from the same company are supported as long as their emails differ
+
+### State Transitions
+
+- Lead status transitions are **flexible** — you can move back from `DEAL` to earlier states if business circumstances change
+- Status updates are **idempotent** — re-submitting the same status doesn't create side effects unless needed for recovery
+
+### Notification Handling
 
 The core value of this app is **instant team notification**. A lead that nobody knows about is a lead that gets lost.
 
-Most apps treat notifications as fire-and-forget: send it and hope it works. We don't. **Slack notifications are a critical business event**, so we persist their state in the database:
+Most apps treat notifications as fire-and-forget. We don't. **Slack notifications are a critical business event**, so we persist their state:
 
 | State | Meaning |
 |-------|---------|
@@ -130,17 +152,15 @@ Most apps treat notifications as fire-and-forget: send it and hope it works. We 
 
 This means:
 - If Slack fails, **the lead is still saved** (we don't lose business data)
-- We know exactly which notifications failed and can retry them
-- The `PATCH /leads/:id` endpoint automatically retries failed notifications when you update a lead
+- Failed notifications are explicitly tracked and can be retried
+- The `PATCH /leads/:id` endpoint automatically retries failed notifications
 
 **The database is the source of truth. Slack is the delivery mechanism.**
 
 ### Other Decisions
 
 - **Single user, no auth** — Internal tool for small teams. Auth is a future enhancement.
-- **Reversible statuses** — Deals fall through. Lost leads come back. Reality isn't linear.
 - **Selective notifications** — Only for `NEW` leads and `DEAL` closures. No Slack spam.
-- **Unique emails** — Duplicates return `409 Conflict`.
 
 ---
 
