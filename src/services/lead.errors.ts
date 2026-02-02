@@ -1,5 +1,9 @@
 export class SlackNotificationError extends Error {
-    constructor(public leadId: number,public type: 'NEW LEAD' | 'DEAL CLOSED'){
+    constructor(
+        public leadId: number,
+        public type: 'NEW LEAD' | 'DEAL CLOSED',
+        public lead?: unknown
+    ){
         super(`Slack notification failed: ${type} `);
         this.name= 'SlackNotificationError';
     }

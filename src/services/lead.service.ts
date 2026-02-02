@@ -61,12 +61,12 @@ export async function createLead(data: CreateLeadInput): Promise<Lead> {
       const failedType = lead.newLeadNotification === 'SENT' ? 'DEAL CLOSED' : 'NEW LEAD';
       const updateField = failedType === 'NEW LEAD' ? 'newLeadNotification' : 'dealClosedNotification';
 
-      await prisma.lead.update({
+      const updatedLead = await prisma.lead.update({
         where: { id: lead.id },
         data: { [updateField]: 'FAILED' },
       });
 
-      throw new SlackNotificationError(lead.id, failedType);
+      throw new SlackNotificationError(lead.id, failedType, updatedLead);
     }
 
     //  Anything else is truly unexpected
