@@ -64,35 +64,16 @@ flowchart TB
 
 ```mermaid
 flowchart LR
-    subgraph Entry
-        server.ts --> app.ts
-    end
-
-    subgraph Routing
-        app.ts --> lead.route.ts
-    end
-
-    subgraph Request["Request Handling"]
-        lead.route.ts --> lead.controller.ts
-    end
-
-    subgraph Validation
-        lead.controller.ts <--> lead.schema.ts
-    end
-
-    subgraph Business["Business Logic"]
-        lead.controller.ts <--> lead.service.ts
-    end
-
-    subgraph Data["Data & Notifications"]
-        lead.service.ts <--> database.ts
-        lead.service.ts <--> slack.ts
-    end
-
-    subgraph External
-        database.ts <--> PostgreSQL[(PostgreSQL)]
-        slack.ts --> SlackAPI[Slack API]
-    end
+    server.ts --> app.ts
+    app.ts --> lead.route.ts
+    lead.route.ts --> lead.controller.ts
+    lead.controller.ts -->|1. Validate| lead.schema.ts
+    lead.schema.ts -->|2. Validated data| lead.controller.ts
+    lead.controller.ts -->|3. Business logic| lead.service.ts
+    lead.service.ts <--> database.ts
+    lead.service.ts <--> slack.ts
+    database.ts <--> PostgreSQL[(PostgreSQL)]
+    slack.ts --> SlackAPI[Slack API]
 ```
 
 ---
