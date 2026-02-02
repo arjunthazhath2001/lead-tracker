@@ -208,6 +208,9 @@ This will:
 | `GET` | `/leads` | Get all leads (optionally filter by `?status=NEW`) |
 | `PATCH` | `/leads/:id` | Update lead status |
 
+> [!NOTE]
+> All endpoints have been thoroughly tested for edge cases including invalid inputs, missing fields, duplicate emails, non-existent resources, and external service failures. Each error returns an appropriate HTTP status code with a clear, actionable message to help clients handle failures gracefully.
+
 ### API Testing with Postman
 
 The included Postman collection demonstrates:
