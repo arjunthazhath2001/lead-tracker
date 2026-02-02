@@ -5,7 +5,7 @@ export const createLeadSchema = z.object({
 
     contactName: z.string().trim().min(1,'Contact name is required').max(100, 'Contact name must be 100 characters or less'),
 
-    email: z.email('Invalid email address'),
+    email: z.email('Invalid email address').transform(email => email.trim().toLowerCase()),
 
     source: z.enum(['LINKEDIN', 'INTRO', 'INBOUND', 'OTHER']),
 
