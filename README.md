@@ -80,20 +80,58 @@ The collection serves as both documentation and an executable test suite.
 
 ---
 
+## Prerequisites
+
+| Requirement | Installation |
+|-------------|--------------|
+| **Docker** | [docker.com/get-docker](https://www.docker.com/get-docker) |
+| **Docker Compose** | Included with Docker Desktop (Mac/Windows). Linux: `sudo apt install docker-compose` |
+| **Git** | [git-scm.com](https://git-scm.com/) |
+
+Optional: [VS Code](https://code.visualstudio.com/) or any code editor to view/edit files.
+
+---
+
 ## Quick Start
 
+### 1. Clone the repo
+
 ```bash
-# 1. Clone and setup
 git clone https://github.com/arjunthazhath2001/lead-tracker.git
 cd lead-tracker
+```
 
-# 2. Add your Slack webhook (see setup below)
+### 2. Create `.env` file with your Slack webhook
+
+**Mac / Linux:**
+```bash
 echo 'SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL' > .env
+```
 
-# 3. Start everything
+**Windows (PowerShell):**
+```powershell
+"SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL" | Out-File -Encoding utf8 .env
+```
+
+**Windows (CMD):**
+```cmd
+echo SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL > .env
+```
+
+Or just create a `.env` file manually and paste:
+```
+SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL
+```
+
+### 3. Start the application
+
+```bash
 docker-compose up --build
+```
 
-# 4. Run migrations (first time only)
+### 4. Run migrations (first time only)
+
+```bash
 docker exec -it lead-tracker-app npx prisma migrate deploy
 ```
 
